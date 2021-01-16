@@ -8,3 +8,9 @@ class Image(models.Model):
     posted_date= models.DateTimeField(auto_now_add=True)
     description = models.CharField(max_length =200)
     
+    class Meta:
+        '''
+        class method to display images by date posted
+        '''
+        ordering = ['posted_date']
+    
