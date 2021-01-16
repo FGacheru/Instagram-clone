@@ -13,4 +13,13 @@ class Image(models.Model):
         class method to display images by date posted
         '''
         ordering = ['posted_date']
+        
+    def __str__(self):
+        return self.description
+    
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = models.ImageField(default='default.png', upload_to='profile_pics')
+
+
     
