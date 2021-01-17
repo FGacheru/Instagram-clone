@@ -1,9 +1,15 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required.
+from django.shortcuts import render,redirect
+from django.http  import HttpResponse,Http404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from ig_app.models import Post, Comment, Preference
+from .models import *
+from django.views.generic import ListView
 
 # Create your views here.
+
+PAGINATION_COUNT = 3
+
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
@@ -17,12 +23,12 @@ def register(request):
     return render(request, 'users/register.html', {'form': form})
 
 
-@login_required(login_url='/accounts/login/')
-def article(request, article_id):
+# @login_required(login_url='/accounts/login/')
+# def article(request, article_id):
     
     
 class PostListView(LoginRequiredMixin, ListView):
-    model = Post
+    model = Image
     template_name = 'ig_app/home.html'
     context_object_name = 'posts'
     ordering = ['-date_posted']
@@ -73,3 +79,47 @@ def profile(request):
         pform = ProfileUpdateForm(instance=request.user.profile)
 
     return render(request, 'users/profile.html', {'uform': uform, 'pform': pform})
+
+def index(request):
+    '''
+    Method to return all images, locations, categories
+    '''
+    images = Image.objects.all()
+    
+    context = {
+        "images":images,
+        
+    }
+    
+    return render(request, 'all-ig/index.html', context)
+
+@login_required
+def search_results(request):
+    if request.method == 'POST':
+        kerko = request.POST.get('search')
+        print(kerko)
+        results = User.objects.filter(username__contains=kerko)
+        context = {
+            'results':results
+        }
+        return render(request, 'all-ig/search.html', context)
+    
+class PostDetailView(DetailView):
+    model = Image
+    template_name = 'blog/post_detail.html'
+    context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        comments_connected = Comment.objects.filter(post_connected=self.get_object()).order_by('-date_posted')
+        data['comments'] = comments_connected
+        data['form'] = NewCommentForm(instance=self.request.user)
+        return data
+
+    def post(self, request, *args, **kwargs):
+        new_comment = Comment(content=request.POST.get('content'),
+                              author=self.request.user,
+                              post_connected=self.get_object())
+        new_comment.save()
+
+        return self.get(self, request, *args, **kwargs)
