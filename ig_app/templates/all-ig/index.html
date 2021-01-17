@@ -1,0 +1,52 @@
+{% extends 'all-ig/base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        {%for post in images%}
+        <div class="col-md-8 mb-5">
+            <div class="media">
+                <div class="col-md-4">
+                    <div style="width: 50px; overflow:hidden; border-radius:50%" class="img-wrapper">
+                        <img src="{{user.profile.profile_pic.url }}" width="80px" alt="profile">
+                    </div>
+                </div>
+                <div class="media-body" style="margin-left: -150px; margin-top: 20px;">
+                    <h5 class="account-heading">{{user.username}}</h5>
+                </div>
+
+            </div>
+            <div class="card" style="width: 50rem;">
+                <img src="{{post.image.url}}" class="img-fluid">
+                <div class="card-body">
+                    <!-- <h4 <i class="far fa-heart"></i></h4> -->
+                    <a href="#" <i class="far fa-heart" style="font-size: 40px; width: 70px;"></i></a>
+                    <a href="{% url 'comments' post.id %}" <i class="far fa-comment" style="font-size: 40px;"></i></a>
+                    <a href="#" class="card-link"></a>
+                    <!-- <h5 <i class="far fa-comment"></i></h5> -->
+                    <a href="#" <i class="fas fa-bookmark" style="font-size: 40px; margin-left: 450px;"></i></a>
+
+                    <br>
+                    <br>
+                    <h5 class="card-title">Liked by <strong>Frank</strong> and 20 others</h5>
+
+                    <div class="commentsection">
+                        <a href=""></a><p>View all comments: {{ post.comments.count }}</p>
+                        {% for comment in comment %}
+                            <p>{{comment.user}}</p>
+                            <p>{{comment.content}}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {%endfor%}
+
+        <div class="col-md-4"></div>
+    </div>
+
+</div>
+
+{%endblock%}

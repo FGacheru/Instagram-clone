@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'accounts/', include('django_registration.backends.one_step.urls')),
     path(r'accounts/', include('django.contrib.auth.urls')),
-    
+    path('',include('ig_app.urls')),
+    path("accounts/logout", views.logout_then_login, name= "logout"),
     
 ]
