@@ -4,6 +4,18 @@ from django.contrib.auth.models import User
 from ig_app.models import Post, Comment, Preference
 
 # Create your views here.
+def register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}.')
+            return redirect('login')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'users/register.html', {'form': form})
+
 
 @login_required(login_url='/accounts/login/')
 def article(request, article_id):
