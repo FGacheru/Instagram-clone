@@ -55,3 +55,21 @@ class PostListView(LoginRequiredMixin, ListView):
         for obj in qs:
             follows.append(obj.follow_user)
         return Post.objects.filter(author__in=follows).order_by('-date_posted')
+    
+    
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        uform = UserUpdateForm(request.POST, instance=request.user)
+        pform = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+
+        if uform.is_valid() and pform.is_valid():
+            uform.save()
+            pform.save()
+            messages.success(request, f'Account has been updated.')
+            return redirect('profile')
+    else:
+        uform = UserUpdateForm(instance=request.user)
+        pform = ProfileUpdateForm(instance=request.user.profile)
+
+    return render(request, 'users/profile.html', {'uform': uform, 'pform': pform})
