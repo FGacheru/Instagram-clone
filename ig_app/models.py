@@ -1,10 +1,12 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
 
 # Create your models here.
 
 class Image(models.Model):
     title = models.CharField(max_length =30)
-    image = CloudinaryField('image')
+    # image = CloudinaryField('image')
     posted_date= models.DateTimeField(auto_now_add=True)
     description = models.CharField(max_length =200)
     
@@ -47,6 +49,20 @@ class Follow(models.Model):
     user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
     follow_user = models.ForeignKey(User, related_name='follow_user', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
+    
+class Post(models.Model):
+    content = models.TextField(max_length=1000)
+    date_posted = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    likes= models.IntegerField(default=0)
+    dislikes= models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.content[:5]
+
+    @property
+    def number_of_comments(self):
+        return Comment.objects.filter(post_connected=self).count()
 
 
 
