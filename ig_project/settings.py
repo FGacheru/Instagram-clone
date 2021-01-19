@@ -15,6 +15,7 @@ from pathlib import Path
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+from decouple import config
 
 
 
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'django_registration',
     'ig_app',
     'bootstrap3',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -78,14 +80,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ig_project.wsgi.application'
 
+# Email configurations remember to install python-decouple
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'instagram',
+        'USER': 'frank',
+    'PASSWORD':'Access',
     }
 }
 
@@ -138,4 +149,5 @@ cloudinary.config(
 )
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 

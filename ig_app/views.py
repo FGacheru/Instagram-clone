@@ -4,122 +4,170 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from .models import *
-from django.views.generic import ListView
+from django.views.generic import ListView,DetailView
+from django.template import RequestContext
+import datetime as dt
+from . forms import NewsLetterForm,NewPostForm
+from . email import send_welcome_email
+from .forms import *
+
 
 # Create your views here.
 
-PAGINATION_COUNT = 3
-
-def register(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}.')
-            return redirect('login')
-    else:
-        form = UserRegisterForm()
-    return render(request, 'users/register.html', {'form': form})
-
-
-# @login_required(login_url='/accounts/login/')
-# def article(request, article_id):
     
-    
-class PostListView(LoginRequiredMixin, ListView):
-    model = Image
-    template_name = 'ig_app/home.html'
-    context_object_name = 'posts'
-    ordering = ['-date_posted']
-    paginate_by = PAGINATION_COUNT
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-
-        all_users = []
-        data_counter = Post.objects.values('author')\
-            .annotate(author_count=Count('author'))\
-            .order_by('-author_count')[:6]
-
-        for aux in data_counter:
-            all_users.append(User.objects.filter(pk=aux['author']).first())
-        # if Preference.objects.get(user = self.request.user):
-        #     data['preference'] = True
-        # else:
-        #     data['preference'] = False
-        data['preference'] = Preference.objects.all()
-        # print(Preference.objects.get(user= self.request.user))
-        data['all_users'] = all_users
-        print(all_users, file=sys.stderr)
-        return data
-
-    def get_queryset(self):
-        user = self.request.user
-        qs = Follow.objects.filter(user=user)
-        follows = [user]
-        for obj in qs:
-            follows.append(obj.follow_user)
-        return Post.objects.filter(author__in=follows).order_by('-date_posted')
-    
-    
-@login_required
+@login_required(login_url='/accounts/login/')    
 def profile(request):
     if request.method == 'POST':
-        uform = UserUpdateForm(request.POST, instance=request.user)
-        pform = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
 
-        if uform.is_valid() and pform.is_valid():
-            uform.save()
-            pform.save()
-            messages.success(request, f'Account has been updated.')
-            return redirect('profile')
+        userForm = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(
+            request.POST, request.FILES, instance=request.user)
+
+        if  profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+
+            return redirect('home')
+
     else:
-        uform = UserUpdateForm(instance=request.user)
-        pform = ProfileUpdateForm(instance=request.user.profile)
-
-    return render(request, 'users/profile.html', {'uform': uform, 'pform': pform})
-
-def index(request):
-    '''
-    Method to return all images, locations, categories
-    '''
-    images = Image.objects.all()
-    
-    context = {
-        "images":images,
         
-    }
-    
-    return render(request, 'all-ig/index.html', context)
+        profile_form = ProfileUpdateForm(instance=request.user)
+        user_form = UserUpdateForm(instance=request.user)
 
-@login_required
-def search_results(request):
-    if request.method == 'POST':
-        kerko = request.POST.get('search')
-        print(kerko)
-        results = User.objects.filter(username__contains=kerko)
-        context = {
-            'results':results
+        params = {
+            'user_form':user_form,
+            'profile_form': profile_form
+
         }
-        return render(request, 'all-ig/search.html', context)
+
+    return render(request, 'all-ig/profile.html', params)
+
+def prof(request):
+    # user_prof = get_object_or_404(User, username=username)
+    # if request.user == user_prof:
+    #     return redirect('profile', username=request.user.username)
+    profile = Profile.objects.filter(user = request.user)
+    return render(request,"all-ig/profile.html",{"profile":profile})
+
+
+def editProfile(request):
     
-class PostDetailView(DetailView):
-    model = Image
-    template_name = 'blog/post_detail.html'
-    context_object_name = 'post'
+    if request.method == 'POST':
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        comments_connected = Comment.objects.filter(post_connected=self.get_object()).order_by('-date_posted')
-        data['comments'] = comments_connected
-        data['form'] = NewCommentForm(instance=self.request.user)
-        return data
+        userForm = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(
+            request.POST, request.FILES, instance=request.user)
 
-    def post(self, request, *args, **kwargs):
-        new_comment = Comment(content=request.POST.get('content'),
-                              author=self.request.user,
-                              post_connected=self.get_object())
-        new_comment.save()
+        if  profile_form.is_valid():
+            userForm.save()
+            profile_form.save()
 
-        return self.get(self, request, *args, **kwargs)
+            return redirect('profile')
+
+    else:
+        
+        profile_form = ProfileUpdateForm(instance=request.user)
+        user_form = UserUpdateForm(instance=request.user)
+
+        params = {
+            'user_form':user_form,
+            'profile_form': profile_form
+
+        }
+
+    return render(request, 'all-ig/updateProfile.html', params)
+
+
+@login_required(login_url='/accounts/login/')
+def index(request):
+    date = dt.date.today()
+    images = Image.objects.all()
+    current_user = request.user
+    users = Profile.objects.all()
+    if request.method == 'POST':
+        form = NewsLetterForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['your_name']
+            email = form.cleaned_data['email']
+            recipient = NewsLetterRecipients(name = name,email = email)
+            recipient.save()
+            send_welcome_email(name,email)
+            HttpResponseRedirect('index')
+    else:
+        form = NewsLetterForm()
+    return render(request, 'all-ig/index.html', {"date": date,"images":images, "users":users, "form": form})
+
+def search_results(request):
+    '''
+    Method to search by location or category
+    '''
+    if 'result' in request.GET and request.GET["result"]:
+        search_term = request.GET.get("result")
+        searched_images = Image.search_by_author(search_term)
+       
+        message = f"{search_term}"
+        return render(request, 'all-ig/search.html', {"message":message, "images":searched_images})
+    elif 'result' in request.GET and request.GET["result"]:
+        search_term = request.GET.get("result")
+        searched_images = Picture.search_by_author(search_term)
+        message = f"{search_term}"    
+
+        return render(request, 'all-ig/search.html', {"message":message, "images":searched_images})
+    else:
+        message = "You haven't searched for any term"
+        return render(request, 'all-ig/search.html', {"message":message})
+
+    
+def new_post(request):
+    current_user = request.user
+    if request.method == 'POST':
+        form = NewPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = current_user
+            post.save()
+        return redirect('post')
+    else:
+        form = NewPostForm()
+    return render(request, 'all-ig/post.html', {"form": form})
+
+@login_required(login_url='/accounts/login/')
+def comment(request,id):
+    comments = Comment.objects.filter(postt= id)
+    images = Image.objects.filter(id=id).all()
+    current_user = request.user
+    user_profile = Profile.objects.get(user = current_user)
+    image = get_object_or_404(Image, id=id)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit = False)
+            comment.postt = image
+            comment.userr = user_profile
+            comment.save()
+            return HttpResponseRedirect(request.path_info)
+    else:
+        form = CommentForm()
+    return render(request,'all-ig/comment.html',{"form":form,"images":images,"comments":comments})
+
+@login_required(login_url='/accounts/login/')
+def newPost(request):
+    current_user = request.user
+    user_profile = Profile.objects.get(user = current_user)
+    if request.method == 'POST':
+        form = NewPostForm(request.POST, request.FILES)        
+        if form.is_valid():
+            image=form.cleaned_data.get('image')
+            imageCaption=form.cleaned_data.get('imageCaption')
+            post = Image(image = image,imageCaption= imageCaption, profile=user_profile)
+            post.savePost()
+            
+        else:
+            print(form.errors)
+
+        return redirect('home')
+
+    else:
+        form = NewPostForm()
+    return render(request, 'newPost.html', {"form": form})
+
