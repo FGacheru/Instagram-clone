@@ -1,52 +1,64 @@
-{% extends 'all-ig/base.html' %}
-
+{%extends 'all-ig/base.html'%}
+{% load bootstrap3 %}
 {% block content %}
-
+{{ block.super}}
 <div class="container">
     <div class="row">
-        {%for post in images%}
-        <div class="col-md-8 mb-5">
-            <div class="media">
-                <div class="col-md-4">
-                    <div style="width: 50px; overflow:hidden; border-radius:50%" class="img-wrapper">
-                        <img src="{{user.profile.profile_pic.url }}" width="80px" alt="profile">
-                    </div>
-                </div>
-                <div class="media-body" style="margin-left: -150px; margin-top: 20px;">
-                    <h5 class="account-heading">{{user.username}}</h5>
-                </div>
-
+        <div class="row">
+            <div class="col-md-2">
             </div>
-            <div class="card" style="width: 50rem;">
-                <img src="{{post.image.url}}" class="img-fluid">
-                <div class="card-body">
-                    <!-- <h4 <i class="far fa-heart"></i></h4> -->
-                    <a href="#" <i class="far fa-heart" style="font-size: 40px; width: 70px;"></i></a>
-                    <a href="{% url 'comments' post.id %}" <i class="far fa-comment" style="font-size: 40px;"></i></a>
-                    <a href="#" class="card-link"></a>
-                    <!-- <h5 <i class="far fa-comment"></i></h5> -->
-                    <a href="#" <i class="fas fa-bookmark" style="font-size: 40px; margin-left: 450px;"></i></a>
+            <div class="col-md-7">
+                <!-- Looping through images   -->
+                {% for image in images %}
+                <div class="card mb-3 card1">
+                    <div class="row">
+                        <div class="row">
+                            <div class="col-md-1">
+                                <div class="card-body avat">
+                                    <img src="{{image.author_profile.image.url}}" class="card-img-top"
+                                        alt="{{image.Author}}">
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <h5 class="card-title">{{image.Author}}</h5>
+                            </div>
+                        </div>
+                        <img src="{{image.image.url}}" class="card-img-top" alt="{{image.image_name}}" height="600px"
+                            width="550px">
 
-                    <br>
-                    <br>
-                    <h5 class="card-title">Liked by <strong>Frank</strong> and 20 others</h5>
-
-                    <div class="commentsection">
-                        <a href=""></a><p>View all comments: {{ post.comments.count }}</p>
-                        {% for comment in comment %}
-                            <p>{{comment.user}}</p>
-                            <p>{{comment.content}}</p>
-                        {% endfor %}
+                        <div class="card-body">
+                            <h5 class="card-title"></h5>
+                            <p class="card-text">{{image.Author}}</p>
+                            <p class="card-text">{{ image.content }}</p>
+                        </div>
                     </div>
+                </div><br><br>
+                {% empty %}
+                <div class="row">
+                    <h2 class="text-center">There No Image Items</h2>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-md-3 avat">
+                <h3>Suggestions For You</h3>
+                {% for user in users %}
+                <img src="{{user.image.url}}" class="card-img-top" alt="{{user.user}}">
+                <p> {{user.user}} <button class="btn btn-success">Follow</button> </p>
+                <hr>
+                {% empty %}
+                <div class="row">
+                    <h2 class="text-center">There No users</h2>
+                </div>
+                {% endfor %}
+                <div class="container-fluid">
+                    <form action="{%url 'index'%}" method="post">
+                        {%csrf_token%}
+                        {% bootstrap_form form layout='inline' %}
+                        <input type="submit" value="Subscribe">
+                    </form>
                 </div>
             </div>
-
         </div>
-        {%endfor%}
-
-        <div class="col-md-4"></div>
     </div>
-
 </div>
-
-{%endblock%}
+{% endblock %}
