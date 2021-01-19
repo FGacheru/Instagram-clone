@@ -2,33 +2,35 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from cloudinary.models import CloudinaryField
+from django.urls import reverse
 
 # Create your models here.
+    
+class NewsLetterRecipients(models.Model):
+    name = models.CharField(max_length = 30)
+    email = models.EmailField()
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(default='default.png', upload_to='profile_pics')
-    
+    image = CloudinaryField('image')
+    Bio = models.CharField(max_length=30)
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    following = models.ManyToManyField(User,blank=True,related_name='follow')
+
     def __str__(self):
-        return f'{self.user.username} Profile'
+        return self.user.username
+
+
     
-    @property
-    def following(self):
-        return Follow.objects.filter(user=self.user).count()
-    
-    @property
-    def followers(self):
-        return Follow.objects.filter(follow_user=self.user).count()
-    
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        super().save()
-        
-        img = Image.open(self.image.path)
-        if img.height > 300 or img.width > 300:
-            output_size = (300, 300)
-            img.thumbnail(output_size)
-            img.save(self.image.path)
+    def save_profile(self):
+        self.user
+
+    def delete_profile(self):
+        self.delete()    
+
+
+    @classmethod
+    def search_profile(cls, name):
+        return cls.objects.filter(user__username__icontains=name).all()
             
             
 class Follow(models.Model):
@@ -76,6 +78,21 @@ class Preference(models.Model):
 
     class Meta:
        unique_together = ("user", "post", "value")
+       
+class Post(models.Model):
+    content = models.TextField(max_length=1000)
+    date_posted = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    likes= models.IntegerField(default=0)
+    dislikes= models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.content[:5]
+
+    @property
+    def number_of_comments(self):
+        return Comment.objects.filter(post_connected=self).count()
+
 
 
 
