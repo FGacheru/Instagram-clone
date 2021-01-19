@@ -84,6 +84,7 @@ def index(request):
     images = Image.objects.all()
     current_user = request.user
     users = Profile.objects.all()
+    
     if request.method == 'POST':
         form = NewsLetterForm(request.POST)
         if form.is_valid():
@@ -133,22 +134,21 @@ def new_post(request):
 
 @login_required(login_url='/accounts/login/')
 def comment(request,id):
-    comments = Comment.objects.filter(postt= id)
-    images = Image.objects.filter(id=id).all()
     current_user = request.user
-    user_profile = Profile.objects.get(user = current_user)
-    image = get_object_or_404(Image, id=id)
+    image = get_object_or_404(Post, id=id)
+    comment = Comments.objects.filter(image = id).all()
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit = False)
-            comment.postt = image
-            comment.userr = user_profile
+            comment.user = current_user
+            comment.image = image
             comment.save()
-            return HttpResponseRedirect(request.path_info)
+            return redirect('/')
     else:
         form = CommentForm()
-    return render(request,'all-ig/comment.html',{"form":form,"images":images,"comments":comments})
+    return render(request,'comment.html',{"form":form, "comment": comment})
+
 
 @login_required(login_url='/accounts/login/')
 def newPost(request):

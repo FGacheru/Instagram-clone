@@ -59,12 +59,37 @@ class Image(models.Model):
     def number_of_comments(self):
         return Comment.objects.filter(post_connected=self).count()
     
-    
-class Comment(models.Model):
-    content = models.TextField(max_length=150)
+class Post(models.Model):
+    content = models.TextField(max_length=1000)
     date_posted = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    post_connected = models.ForeignKey(Image, on_delete=models.CASCADE)
+    likes= models.IntegerField(default=0)
+    dislikes= models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.content[:5]
+
+    @property
+    def number_of_comments(self):
+        return Comment.objects.filter(post_connected=self).count()
+    
+    def save_post(self):
+        self.save()
+    
+    
+class Comment(models.Model):
+    image = models.ForeignKey(Post, related_name='comments', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now=True)
+
+
+    def __str__(self):
+        return '{}'.format(self.content)
+
+    def vaild(self):
+        self.vaild = True
+        self.save()
     
     
 class Preference(models.Model):
@@ -79,19 +104,7 @@ class Preference(models.Model):
     class Meta:
        unique_together = ("user", "post", "value")
        
-class Post(models.Model):
-    content = models.TextField(max_length=1000)
-    date_posted = models.DateTimeField(default=timezone.now)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    likes= models.IntegerField(default=0)
-    dislikes= models.IntegerField(default=0)
 
-    def __str__(self):
-        return self.content[:5]
-
-    @property
-    def number_of_comments(self):
-        return Comment.objects.filter(post_connected=self).count()
 
 
 

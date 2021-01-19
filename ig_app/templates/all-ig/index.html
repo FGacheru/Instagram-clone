@@ -12,9 +12,14 @@
                 {% for image in images %}
                 <div class="card mb-3 card1">
                     <div class="row">
-                        
+
                         <img src="{{image.image.url}}" class="card-img-top" alt="{{image.author}}" height="500px"
                             width="450px">
+                        <div class="">
+                            <li class="list-group-item">
+                                <a href="{%url 'comments' %}"><i class="far fa-comment">comment</i>{{comments}}</a>
+                            </li>
+                        </div>
 
                         <div class="card-body">
                             <h5 class="card-title"></h5>

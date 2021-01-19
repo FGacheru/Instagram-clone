@@ -3,7 +3,7 @@
 #### Author: [Francis Gacheru]
 
 
-* Link to live site: [Instagram-Clone]()
+* Link to live site: [Instagram-Clone](https://github.com/FGacheru/Instagram-clone)
 
 ## Description
 The application allows users to sign up, upload images,view other user's pictures,like them, comment on them and also follow the other users.
