@@ -19,7 +19,7 @@ The application allows users to sign up, upload images,view other user's picture
 |Add a new post|Click on the New Profile icon to be redirected to the new post form|the post will be rendered to the home page
 | Click on log Out in the accounts| Redirects to the login form | Logs out user  |
 
-<!-- ## Setup and installations
+## Setup and installations
 * Fork the data onto your own personal repository.
 * Clone Project to your machine
 * Activate a virtual environment on terminal: `. virtual/bin/activate`
@@ -90,9 +90,9 @@ Open [localhost:8000](http://127.0.0.1:8000/)
 
 
 ## Support and contact details
- Incase you come across errors, have questions, ideas ,concerns, or want to contribute to the application, feel free to reach : francisgacheru2001@gmail.com
+ Incase you come across errors, have questions, ideas ,concerns, or want to contribute to the application you can feel free to reach : francisgacheru2001@gmail.com
 
 
 ### License
 
-* [[License: MIT]](Licence.md) <francisgacheru2001@gmail.com> -->
+* [[License: MIT]](Licence.md) <francisgacheru2001@gmail.com>
