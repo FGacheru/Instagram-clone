@@ -31,7 +31,6 @@ from decouple import config,Csv
 SECRET_KEY = 'ypn681$#5l#0++xqf(slbu*sz#m21j$+u74@^3cg^#qkkjtudi'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
 
 ALLOWED_HOSTS = []
 
