@@ -178,6 +178,10 @@ cloudinary.config(
   api_secret = "UbOlMD5ANCUTHphIxf2TICAYDJA" 
 )
 
+LOGOUT_REDIRECT_URL = 'login'
+
+LOGIN_REDIRECT_URL = 'index'
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
