@@ -31,7 +31,7 @@ SECRET_KEY = 'ypn681$#5l#0++xqf(slbu*sz#m21j$+u74@^3cg^#qkkjtudi'
 DEBUG = True
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 MODE=config("MODE", default="dev")
 # development
