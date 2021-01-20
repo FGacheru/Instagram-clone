@@ -178,7 +178,7 @@ cloudinary.config(
   api_secret = "UbOlMD5ANCUTHphIxf2TICAYDJA" 
 )
 
-LOGOUT_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = 'register'
 
 LOGIN_REDIRECT_URL = 'index'
 
